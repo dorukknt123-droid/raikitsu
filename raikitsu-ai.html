@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Raikitsu AI ⚡</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--fox-orange:#FF6B1A;--fox-gold:#FFB800;--neon-cyan:#00F5FF;--dark-bg:#080B14;--card-bg:#111827;--border-glow:rgba(0,245,255,0.3);--text-primary:#E8F4FF;--text-dim:#7A9CC0;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Rajdhani',sans-serif;background:var(--dark-bg);color:var(--text-primary);height:100dvh;overflow:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.04) 1px,transparent 1px);background-size:40px 40px;animation:gridDrift 20s linear infinite;pointer-events:none;z-index:0;}
+  @keyframes gridDrift{0%{transform:translate(0,0)}100%{transform:translate(40px,40px)}}
+  .orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbFloat 8s ease-in-out infinite;}
+  .orb1{width:300px;height:300px;background:rgba(255,107,26,0.12);top:-80px;left:-80px;}
+  .orb2{width:250px;height:250px;background:rgba(0,245,255,0.08);bottom:-60px;right:-60px;animation-delay:-4s;}
+  @keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+  .app{display:flex;flex-direction:column;height:100dvh;position:relative;z-index:1;}
+  .header{display:flex;align-items:center;padding:0 14px;height:56px;background:rgba(13,18,32,0.95);border-bottom:1px solid var(--border-glow);backdrop-filter:blur(10px);flex-shrink:0;gap:10px;}
+  .logo-area{display:flex;align-items:center;gap:10px;flex:1;}
+  .fox-icon{width:34px;height:34px;flex-shrink:0;}
+  .logo-text{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;background:linear-gradient(135deg,var(--fox-orange),var(--fox-gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;}
+  .logo-sub{font-size:0.55rem;color:var(--neon-cyan);letter-spacing:2px;font-family:'Noto Sans JP',sans-serif;}
+  .badge{padding:3px 8px;border-radius:20px;font-size:0.55rem;font-weight:700;letter-spacing:1px;border:1px solid;font-family:'Orbitron',sans-serif;}
+  .badge-online{border-color:#00FF88;color:#00FF88;background:rgba(0,255,136,0.1);}
+  .badge-mode{border-color:var(--fox-orange);color:var(--fox-orange);background:rgba(255,107,26,0.1);animation:pb 2s infinite;}
+  @keyframes pb{0%,100%{box-shadow:0 0 0 0 rgba(255,107,26,0.4)}50%{box-shadow:0 0 0 4px rgba(255,107,26,0)}}
+  .mode-bar{display:flex;gap:6px;padding:8px 12px;background:rgba(13,18,32,0.9);border-bottom:1px solid var(--border-glow);overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .mode-bar::-webkit-scrollbar{display:none;}
+  .mode-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);white-space:nowrap;transition:all 0.2s;flex-shrink:0;-webkit-user-select:none;user-select:none;}
+  .mode-btn.active{border-color:var(--fox-orange);background:rgba(255,107,26,0.1);}
+  .mode-btn[data-mode="creator"].active{border-color:#FF61D8;background:rgba(255,97,216,0.08);}
+  .mode-btn[data-mode="gamer"].active{border-color:#00FF88;background:rgba(0,255,136,0.07);}
+  .mode-btn[data-mode="tech"].active{border-color:var(--neon-cyan);background:rgba(0,245,255,0.07);}
+  .mode-btn[data-mode="ninetails"].active{border-color:var(--fox-orange);animation:np 1.5s infinite;}
+  @keyframes np{0%,100%{box-shadow:0 0 8px rgba(255,107,26,0.3)}50%{box-shadow:0 0 20px rgba(255,107,26,0.6)}}
+  .mode-icon{font-size:1rem;}
+  .mode-name{font-size:0.75rem;font-weight:700;}
+  .mode-desc{font-size:0.6rem;color:var(--text-dim);}
+  .power-strip{display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(13,18,32,0.8);border-bottom:1px solid rgba(255,184,0,0.15);flex-shrink:0;}
+  .power-label{font-family:'Orbitron',sans-serif;font-size:0.55rem;color:var(--fox-gold);letter-spacing:2px;white-space:nowrap;}
+  .power-bars{display:flex;gap:3px;flex:1;}
+  .power-bar{flex:1;height:7px;border-radius:2px;background:rgba(255,184,0,0.1);border:1px solid rgba(255,184,0,0.2);transition:all 0.3s;}
+  .power-bar.active{background:linear-gradient(90deg,var(--fox-gold),var(--fox-orange));border-color:var(--fox-gold);box-shadow:0 0 5px rgba(255,184,0,0.4);}
+  .power-text{font-size:0.6rem;color:var(--text-dim);white-space:nowrap;}
+  .chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch;}
+  .chat-messages::-webkit-scrollbar{width:3px;}
+  .chat-messages::-webkit-scrollbar-thumb{background:var(--border-glow);border-radius:2px;}
+  .msg{display:flex;gap:8px;max-width:88%;animation:msgIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;}
+  @keyframes msgIn{from{opacity:0;transform:translateY(10px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .msg.user{align-self:flex-end;flex-direction:row-reverse;}
+  .msg.ai{align-self:flex-start;}
+  .msg-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;border:2px solid;}
+  .msg.ai .msg-avatar{background:linear-gradient(135deg,rgba(255,107,26,0.2),rgba(255,184,0,0.1));border-color:var(--fox-orange);box-shadow:0 0 10px rgba(255,107,26,0.3);}
+  .msg.user .msg-avatar{background:rgba(0,245,255,0.1);border-color:var(--neon-cyan);}
+  .msg-bubble{padding:10px 14px;border-radius:14px;font-size:0.92rem;line-height:1.55;font-weight:500;}
+  .msg.ai .msg-bubble{background:var(--card-bg);border:1px solid rgba(0,245,255,0.15);border-top-left-radius:4px;}
+  .msg.user .msg-bubble{background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(191,0,255,0.1));border:1px solid rgba(0,245,255,0.25);border-top-right-radius:4px;}
+  .msg-mode-tag{display:inline-block;font-size:0.55rem;font-family:'Orbitron',sans-serif;letter-spacing:1px;padding:2px 7px;border-radius:20px;margin-bottom:5px;}
+  .tag-creator{background:rgba(255,97,216,0.15);color:#FF61D8;border:1px solid rgba(255,97,216,0.3);}
+  .tag-gamer{background:rgba(0,255,136,0.1);color:#00FF88;border:1px solid rgba(0,255,136,0.3);}
+  .tag-tech{background:rgba(0,245,255,0.1);color:var(--neon-cyan);border:1px solid rgba(0,245,255,0.3);}
+  .tag-ninetails{background:rgba(255,107,26,0.15);color:var(--fox-orange);border:1px solid rgba(255,107,26,0.4);}
+  .tag-normal{background:rgba(255,184,0,0.1);color:var(--fox-gold);border:1px solid rgba(255,184,0,0.3);}
+  .typing{display:flex;align-items:center;gap:5px;padding:10px 14px;background:var(--card-bg);border:1px solid rgba(0,245,255,0.1);border-radius:14px;border-top-left-radius:4px;}
+  .typing-dot{width:6px;height:6px;border-radius:50%;background:var(--neon-cyan);animation:tb 1.2s infinite;}
+  .typing-dot:nth-child(2){animation-delay:0.2s;background:var(--fox-gold);}
+  .typing-dot:nth-child(3){animation-delay:0.4s;background:var(--fox-orange);}
+  @keyframes tb{0%,80%,100%{transform:translateY(0);opacity:0.5}40%{transform:translateY(-5px);opacity:1}}
+  .welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px;padding:20px;text-align:center;}
+  .welcome-fox{font-size:3.5rem;animation:fb 3s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(255,107,26,0.5));}
+  @keyframes fb{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+  .welcome-title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,var(--fox-orange),var(--fox-gold),var(--neon-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .welcome-jp{font-family:'Noto Sans JP',sans-serif;font-size:0.7rem;color:var(--fox-orange);opacity:0.7;letter-spacing:3px;}
+  .welcome-sub{color:var(--text-dim);font-size:0.88rem;max-width:340px;line-height:1.6;}
+  .welcome-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:360px;margin-top:4px;}
+  .w-card{padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:0.78rem;cursor:pointer;color:var(--text-dim);text-align:left;transition:all 0.2s;-webkit-user-select:none;user-select:none;}
+  .w-card:active{border-color:var(--fox-orange);color:var(--fox-gold);background:rgba(255,107,26,0.05);}
+  .input-area{padding:10px 12px;border-top:1px solid var(--border-glow);background:rgba(13,18,32,0.95);backdrop-filter:blur(10px);flex-shrink:0;}
+  .quick-tags{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+  .quick-tags::-webkit-scrollbar{display:none;}
+  .qtag{padding:5px 11px;border-radius:20px;font-size:0.7rem;cursor:pointer;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);background:rgba(255,255,255,0.02);white-space:nowrap;flex-shrink:0;-webkit-user-select:none;user-select:none;}
+  .qtag:active{border-color:var(--neon-cyan);color:var(--neon-cyan);}
+  .input-row{display:flex;gap:8px;align-items:flex-end;}
+  .chat-input{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border-glow);border-radius:12px;padding:10px 14px;color:var(--text-primary);font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:500;resize:none;outline:none;max-height:100px;line-height:1.4;-webkit-appearance:none;appearance:none;}
+  .chat-input:focus{border-color:var(--neon-cyan);}
+  .chat-input::placeholder{color:var(--text-dim);}
+  .send-btn{width:44px;height:44px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;background:linear-gradient(135deg,var(--fox-orange),var(--fox-gold));box-shadow:0 4px 14px rgba(255,107,26,0.35);-webkit-user-select:none;user-select:none;}
+  .send-btn:active{transform:scale(0.94);}
+  .ninetails-overlay{display:none;position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(255,107,26,0.08) 0%,transparent 70%);pointer-events:none;z-index:50;animation:ng 2s infinite;}
+  .ninetails-overlay.show{display:block;}
+  @keyframes ng{0%,100%{opacity:0.5}50%{opacity:1}}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div><div class="orb orb2"></div>
+<div class="ninetails-overlay" id="ntOverlay"></div>
+<div class="app">
+
+  <header class="header">
+    <div class="logo-area">
+      <div class="fox-icon">
+        <svg viewBox="0 0 40 40" fill="none" width="34" height="34">
+          <path d="M5 30 L10 15 L8 8 L14 12 L20 6 L26 12 L32 8 L30 15 L35 30 L20 36 Z" fill="url(#fg)" opacity="0.9"/>
+          <path d="M8 8 L14 12" stroke="#FFB800" stroke-width="1.5"/><path d="M32 8 L26 12" stroke="#FFB800" stroke-width="1.5"/>
+          <circle cx="15" cy="19" r="2.5" fill="#00F5FF"/><circle cx="25" cy="19" r="2.5" fill="#00F5FF"/>
+          <circle cx="15" cy="19" r="1" fill="#080B14"/><circle cx="25" cy="19" r="1" fill="#080B14"/>
+          <path d="M16 25 Q20 28 24 25" stroke="#FF6B1A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <defs><linearGradient id="fg" x1="0" y1="0" x2="40" y2="40"><stop offset="0%" stop-color="#FF6B1A"/><stop offset="100%" stop-color="#FFB800"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div><div class="logo-text">RAIKITSU AI</div><div class="logo-sub">雷狐 · THUNDER FOX</div></div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <span class="badge badge-online">● ON</span>
+      <span class="badge badge-mode" id="modeLabel">NORMAL</span>
+    </div>
+  </header>
+
+  <div class="mode-bar">
+    <div class="mode-btn active" data-mode="normal" onclick="setMode('normal')"><span class="mode-icon">⚡</span><div><div class="mode-name">Normal</div><div class="mode-desc">Standart</div></div></div>
+    <div class="mode-btn" data-mode="creator" onclick="setMode('creator')"><span class="mode-icon">🎨</span><div><div class="mode-name">Creator</div><div class="mode-desc">Tasarım & Anime</div></div></div>
+    <div class="mode-btn" data-mode="gamer" onclick="setMode('gamer')"><span class="mode-icon">🎮</span><div><div class="mode-name">Gamer</div><div class="mode-desc">Strateji</div></div></div>
+    <div class="mode-btn" data-mode="tech" onclick="setMode('tech')"><span class="mode-icon">📱</span><div><div class="mode-name">Tech Ninja</div><div class="mode-desc">OPPO & iPad</div></div></div>
+    <div class="mode-btn" data-mode="ninetails" onclick="setMode('ninetails')"><span class="mode-icon">🦊</span><div><div class="mode-name">Nine-Tails</div><div class="mode-desc">AZIM ⚡</div></div></div>
+  </div>
+
+  <div class="power-strip">
+    <span class="power-label">KURAMA</span>
+    <div class="power-bars" id="powerBars">
+      <div class="power-bar active"></div><div class="power-bar active"></div><div class="power-bar active"></div>
+      <div class="power-bar"></div><div class="power-bar"></div><div class="power-bar"></div>
+      <div class="power-bar"></div><div class="power-bar"></div><div class="power-bar"></div>
+    </div>
+    <span class="power-text" id="powerText">3/9</span>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-fox">🦊</div>
+      <div class="welcome-title">RAIKITSU AI</div>
+      <div class="welcome-jp">雷狐知能システム</div>
+      <div class="welcome-sub">Yo! Ben Raikitsu ⚡ Teknoloji, anime, oyun ve yaratıcı projeler için hazırım! OPPO A74 ve iPad tam destekleniyor 🔥</div>
+      <div class="welcome-cards">
+        <div class="w-card" onclick="quickSend('OPPO A74 gizli özellikler')">📱 OPPO A74 İpuçları</div>
+        <div class="w-card" onclick="quickSend('iPad için en iyi uygulamalar')">🍎 iPad Uygulamaları</div>
+        <div class="w-card" onclick="quickSend('anime tarzı kılıf tasarımı')">🎨 Kılıf Tasarımı</div>
+        <div class="w-card" onclick="quickSend('beni motive et')">🦊 Motivasyon Ver!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="quick-tags">
+      <span class="qtag" onclick="quickSend('OPPO A74 ipuçları')">⚡ OPPO Hack</span>
+      <span class="qtag" onclick="quickSend('anime öner')">🌸 Anime Öner</span>
+      <span class="qtag" onclick="quickSend('gadget fikri')">💡 Gadget</span>
+      <span class="qtag" onclick="quickSend('oyun ekipmanı')">🎮 Ekipman</span>
+      <span class="qtag" onclick="quickSend('beni motive et naruto gibi')">🔥 Azim Modu</span>
+    </div>
+    <div class="input-row">
+      <textarea class="chat-input" id="chatInput" placeholder="Raikitsu'ya bir şey sor... ⚡" rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" onclick="sendMessage()">⚡</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MODES={normal:{label:'NORMAL',tag:'tag-normal',tagText:'⚡ RAIKITSU'},creator:{label:'CREATOR',tag:'tag-creator',tagText:'🎨 CREATOR'},gamer:{label:'GAMER',tag:'tag-gamer',tagText:'🎮 GAMER'},tech:{label:'TECH NINJA',tag:'tag-tech',tagText:'📱 TECH NINJA'},ninetails:{label:'🦊 NINE-TAILS',tag:'tag-ninetails',tagText:'🦊 NINE-TAILS'}};
+let currentMode='normal';
+
+const R={
+  normal:[
+    "Yo! Sorun tam bana göre ⚡ Hemen bakalım şuna — ne istiyorsan çözeriz, ikimiz takım gibiyiz!",
+    "Anladım! Bu konuda birkaç harika yolum var. Hazır mısın? 🦊",
+    "Aaah bu klasik bir durum! Hızlıca çözelim zaman kaybetmeyelim ⚡",
+    "Bunu bana sordun, doğru adrese geldin! 🎯",
+    "İlginç soru! Birkaç açıdan ele alabiliriz — en iyisini seçelim birlikte 🔥",
+    "Harika! Bu tam benim alanım. Naruto gibi söyleyeyim: dattebayo, çözeceğiz! 🍥"
+  ],
+  creator:[
+    "Creator Mode aktif! 🎨 Demon Slayer renk paletini düşün — siyah, kırmızı, altın. Kılıf tasarımı olarak mükemmel!",
+    "Jujutsu Kaisen'deki mor-siyah renk geçişi — bunu telefon arka planı olarak uygulayabilirsin, çok şık durur! 🎨",
+    "Tasarım ipucu: 3 renk kuralı — Ana renk + aksan + nötr. Anime tasarımlarında bu formül asla yanıltmaz! ✨",
+    "Chainsaw Man'in kırmızı-siyah temasını düşün, üzerine minimal Japonca yazı tipi... İnanılmaz görünür! 🔥",
+    "Lo-fi aesthetic çok trend şu an — pastel renkler, Japonca yazılar, basit çizgiler. Canva'da şablonlar var! 🌸",
+    "Asimetri güçlüdür! Anime poster tasarımlarına bak, hepsi asimetrik kompozisyon kullanıyor 🎨"
+  ],
+  gamer:[
+    "Gamer Mode açık! 🎮 Takım iletişimi için altın kural: ping atmayı alışkanlık yap!",
+    "OPPO A74'ü gaming için optimize: Ayarlar > Oyun Alanı > Performans Modu. Farkı hemen hissedersin! 🎮",
+    "Strateji: İlk 2 dakika en kritik andır. Pozisyon al, kaynakları gör, sonra saldır! ⚡",
+    "Budget gaming kulaklık? KZ ZSN Pro X — 250₺ civarı, ses kalitesi çok daha pahalılarla yarışıyor! 🎯",
+    "Mobil oyun için hassasiyet ayarlarını optimize et — default'ta bırakma! Düşük sens = daha iyi nişan 🔥",
+    "Takım oyunlarında en büyük hata: solo carry çalışmak! Takımla hareket = zafer ⚡"
+  ],
+  tech:[
+    "Tech Ninja Mode! 📱 OPPO A74 gizli özellik: Telefon arkasına çift dokun > ekran görüntüsü! Ayarlar > Akıllı Hareketler'den aç 🔥",
+    "iPad ipucu: Safari'de bir web sitesini 'Ana Ekrana Ekle' dersen tam ekran uygulama gibi çalışır — App Store gerekmez! 🍎",
+    "OPPO A74'te Geliştirici Modu: Hakkında > Yazılım Sürümü'ne 7 kez dokun. Animasyon hızını 0.5x yapınca telefon uçuyor! ⚡",
+    "ColorOS gizli özellik: Kontrol Merkezi'ni tamamen özelleştirebilirsin. Aşağı çek > sağ üst köşe düzenle > istediğini ekle 📱",
+    "iPad multitasking: Uygulama aç > Dock'tan başka uygulama sürükle > bölünmüş ekran! Sağdan Slide Over = 3 uygulama aynı anda 🔥",
+    "OPPO A74 pil ömrü: Ayarlar > Pil > Pil Koruması > %80'de şarjı yavaşlat. Uzun vadede pil sağlığını ciddi korur 🔋"
+  ],
+  ninetails:[
+    "🦊⚡ NINE-TAILS MODE AKTİF!\n\nNaruto en güçsüz anında bile vazgeçmedi. Sen de geçemezsin! Her düştüğünde kalk, her başarısızlık seni zafere yaklaştırıyor. DATTEBAYO! 🔥",
+    "🦊 Rock Lee'yi hatırla — hiç doğal yeteneği yoktu. SIFIR. Ama sadece azmiyle Gaara'yı titretti. Sen ne istiyorsun? Hadi oraya git! ⚡",
+    "🦊⚡ Goku her yenilgiden sonra ne yaptı? Daha sert antrenman! Sen de sınırını gördün — şimdi aşma vakti. PLUS ULTRA! 💥",
+    "🦊 Itachi her şeyini feda etti ama asla umudunu bırakmadı. Sen neyi bırakıyorsun? Hedefini mi? BIRAKMA! Chakranı topla, devam et! ⚡",
+    "🦊⚡ DATTEBAYO! Biliyorum yoruldun. Ama Luffy'nin Grand Line'ı geçtiğini hatırla — hiç geri dönmedi. Sen de dönme! Sadece İLERİ! 🏴‍☠️",
+    "🦊 Bu projeyi, bu hedefi rastgele seçmedin. Bir nedeni var. O nedeni yakıt olarak kullan! Shinobi yolu kolay olmaz — ama sen bu yolu seçtin! 🔥"
+  ]
+};
+
+const KW={
+  'oppo a74':['tech',"OPPO A74 için özel ipuçları:\n\n📱 Çift dokunuşla ekran görüntüsü: Ayarlar > Akıllı Hareketler\n⚡ Performans modu: Ayarlar > Oyun Alanı > Performans\n🔋 Pil koruması: Ayarlar > Pil > %80 limit\n🎨 Canlı ekran: Ayarlar > Ekran > Zengin Renk Modu\n\nBu dördü OPPO A74'ü bambaşka yapar! 🔥"],
+  'oppo':['tech',"OPPO A74 için gizli özellik: Geliştirici Seçenekleri'ni aç! Hakkında > Yazılım Sürümü'ne 7 kez dokun. Animasyon hızını 0.5x yap — telefon inanılmaz hızlanır! ⚡📱"],
+  'ipad':['tech',"iPad için mutlaka kullanman gereken özellikler:\n\n🍎 Bölünmüş ekran: İki app yan yana\n📝 Hızlı Not: Kilitle ekrandan kaydır\n🌐 Web app: Safari > Ana Ekrana Ekle\n✏️ Slide Over: 3 app aynı anda\n\nBunları biliyor muydun? 🔥"],
+  'kılıf':['creator',"Kılıf tasarımı fikirleri:\n\n🎨 Naruto teması: Siyah + turuncu Uzumaki motifi\n⚡ Demon Slayer: Koyu lacivert + kırmızı alev\n🌸 Lo-fi anime: Pastel renkler + Japonca\n\nRedbubble veya Printful'da kendi tasarımını yaptırabilirsin — çok ucuz! Hangi tarzı seviyorsun?"],
+  'anime':['creator',"Anime önerileri (her tarza göre):\n\n🔥 Aksiyon: Demon Slayer, JJK, Chainsaw Man\n🧠 Düşündürücü: Death Note, Monster, Steins;Gate\n😂 Eğlenceli: Spy x Family, One Punch Man\n💙 Duygusal: Your Lie in April, A Silent Voice\n\nHangisi sana göre? 🦊"],
+  'kulaklık':['gamer',"Oyun kulaklığı önerileri:\n\n💰 Budget (200-400₺): KZ ZSN Pro X — ses kalitesi fiyatını katlar\n🎮 Orta (500-1000₺): HyperX Cloud Core — konfor + ses mükemmel\n👑 Premium: Sony WH-1000XM5 — wireless, noise cancel\n\nOPPO A74'e 3.5mm ile direkt tak çalıştır! ⚡"],
+  'gadget':['normal',"Yaratıcı gadget fikirleri:\n\n💡 MagSafe benzeri manyetik kılıf (OPPO için de var)\n🎮 Telefon gamepad tutucu — mobil gaming için şart\n📸 Lens eki — telefon kamerasını DSLR'a çevirir\n🔋 MagSafe powerbank — kablosuz taşınabilir şarj\n\nHangisi ilgini çekti? 🦊⚡"],
+  'motive':['ninetails',"🦊⚡ AZİM MODU AKTİF!\n\nNaruto'nun sırrını biliyor musun? O hiçbir zaman 'yapabilir miyim?' demedi. Sadece 'nasıl yaparım?' dedi.\n\nSen de öyle yap. Hedefin ne? Söyle bana — birlikte stratejisini kuralım ve DATTEBAYO diyerek başlayalım! 🔥🔥"],
+  'motivasyon':['ninetails',"🦊 KURAMA KONUŞUYOR:\n\nRock Lee hiç doğal yeteneği olmadan dünya klasmanına girdi. Sen ne istiyorsun? O hedefe giden yolda her gün 1% daha iyi ol. 70 günde 2x olursun. 1 yılda tanınmaz hale gelirsin. BAŞLA! ⚡🔥"],
+  'oyun':['gamer',"Mobil gaming için OPPO A74 tam optimize:\n\n🎮 Ayarlar > Oyun Alanı > Performans Modu\n📵 Bildirim engelle oyun sırasında\n🔆 Parlaklığı max yap\n🎧 Kulaklık tak — ses avantaj sağlar\n\nHangi oyunu oynuyorsun? Stratejisini konuşalım! ⚡"],
+};
+
+function setMode(m){
+  currentMode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  document.getElementById('modeLabel').textContent=MODES[m].label;
+  document.getElementById('ntOverlay').classList.toggle('show',m==='ninetails');
+  const lvl={normal:3,creator:5,gamer:6,tech:7,ninetails:9};
+  document.querySelectorAll('.power-bar').forEach((b,i)=>b.classList.toggle('active',i<lvl[m]));
+  document.getElementById('powerText').textContent=`${lvl[m]}/9`;
+}
+
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function quickSend(t){document.getElementById('chatInput').value=t;sendMessage();}
+
+function getReply(text){
+  const lo=text.toLowerCase();
+  // keyword match
+  for(const [kw,[mode,resp]] of Object.entries(KW)){
+    if(lo.includes(kw)) return resp;
+  }
+  // selamlama
+  if(lo.match(/merhaba|selam|hey|yo|naber|nasıls/)) return "Yo! Ben Raikitsu ⚡ Her zamanki gibi tam güçte! Sen nasılsın? Ne yapıyoruz bugün? 🦊";
+  if(lo.match(/teşekkür|sağ ol|eyvallah/)) return "Rica ederim! 🙌 Takım arkadaşları birbirine yardım eder — başka bir şey lazım olursa buradayım ⚡🦊";
+  // mode pool
+  const pool=R[currentMode]||R.normal;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+async function sendMessage(){
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text)return;
+  const welcome=document.getElementById('welcomeScreen');
+  if(welcome)welcome.remove();
+  input.value='';input.style.height='auto';
+  appendMsg('user',text);
+  const container=document.getElementById('chatMessages');
+  const typingEl=document.createElement('div');
+  typingEl.className='msg ai';
+  typingEl.innerHTML=`<div class="msg-avatar">🦊</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  container.appendChild(typingEl);
+  container.scrollTop=container.scrollHeight;
+  await new Promise(r=>setTimeout(r,600+Math.random()*600));
+  typingEl.remove();
+  appendMsg('ai',getReply(text),currentMode);
+}
+
+function appendMsg(role,text,mode=null){
+  const container=document.getElementById('chatMessages');
+  const m=MODES[mode]||MODES.normal;
+  const div=document.createElement('div');
+  div.className=`msg ${role}`;
+  const safe=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  if(role==='ai'){
+    div.innerHTML=`<div class="msg-avatar">🦊</div><div class="msg-bubble">${mode&&mode!=='normal'?`<div class="msg-mode-tag ${m.tag}">${m.tagText}</div>`:''}<div>${safe}</div></div>`;
+  }else{
+    div.innerHTML=`<div class="msg-avatar" style="background:rgba(0,245,255,0.1);border-color:var(--neon-cyan);">👤</div><div class="msg-bubble">${safe}</div>`;
+  }
+  container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+}
+</script>
+</body>
+</html>
