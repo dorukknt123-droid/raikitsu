@@ -93,7 +93,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .ci::placeholder{color:var(--dim);}
 .sbtn{width:40px;height:40px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;background:linear-gradient(135deg,var(--fox),var(--gold));box-shadow:0 4px 14px rgba(255,107,26,.35);-webkit-user-select:none;}
 .sbtn:active{transform:scale(.93);}
-/* HISTORY */
 .hpanel{display:none;position:fixed;inset:0;background:rgba(8,11,20,.97);z-index:200;flex-direction:column;padding:16px;gap:10px;}
 .hpanel.show{display:flex;}
 .htitle{font-family:'Orbitron',sans-serif;font-size:.9rem;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;}
@@ -102,12 +101,12 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .hitem:active{border-color:var(--fox);}
 .hdate{font-size:.58rem;color:var(--dim);margin-bottom:3px;}
 .hprev{font-size:.82rem;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hempty{color:var(--dim);text-align:center;margin-top:40px;font-size:.85rem;}
+.hempty{color:var(--dim);text-align:center;margin-top:40px;font-size:.85rem;line-height:1.8;}
 .cbtn{background:rgba(255,107,26,.15);border:1px solid var(--fox);color:var(--fox);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:.7rem;font-family:'Orbitron',sans-serif;}
 .nto{display:none;position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(255,107,26,.08) 0%,transparent 70%);pointer-events:none;z-index:50;animation:ng 2s infinite;}
 .nto.show{display:block;}
 @keyframes ng{50%{opacity:1}0%,100%{opacity:.5}}
-.load-txt{font-size:.72rem;color:var(--dim);margin-top:6px;}
+.ltxt{font-size:.72rem;color:var(--dim);margin-top:6px;}
 </style>
 </head>
 <body>
@@ -120,8 +119,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <button class="cbtn" onclick="closeHist()">KAPAT</button>
   </div>
   <div style="display:flex;gap:8px;">
-    <button class="hbtn" style="flex:1;text-align:center;" onclick="newChat();closeHist()">＋ Yeni Sohbet</button>
-    <button class="hbtn" style="color:#ff4444;border-color:#ff4444;" onclick="clearAll()">🗑️ Tümünü Sil</button>
+    <button class="hbtn" style="flex:1;text-align:center;padding:8px;" onclick="newChat();closeHist()">＋ Yeni Sohbet</button>
+    <button class="hbtn" style="color:#ff6666;border-color:#ff6666;padding:8px;" onclick="clearAll()">🗑️ Temizle</button>
   </div>
   <div class="hlist" id="hlist"></div>
 </div>
@@ -142,7 +141,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   <div class="hbtns">
     <button class="hbtn" onclick="openHist()">📂</button>
     <button class="hbtn" onclick="newChat()">＋</button>
-    <button class="hbtn" id="vtoggle" onclick="toggleVoice()">🔇 Ses</button>
+    <button class="hbtn" id="vtoggle" onclick="toggleVoice()">🔇</button>
     <span class="bdg bon">● ON</span>
     <span class="bdg bmd" id="mlbl">NORMAL</span>
   </div>
@@ -174,7 +173,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="wsub">Ben Raikitsu ⚡ Soru sor, resim çizdir, ürün ara, haber öğren!</div>
     <div class="wcards">
       <div class="wc" onclick="qs('kendini çiz')">🦊 Kendini Çiz</div>
-      <div class="wc" onclick="qs('bugünün güncel haberleri neler')">📰 Haberler</div>
+      <div class="wc" onclick="qs('bugünün güncel haberleri')">📰 Haberler</div>
       <div class="wc" onclick="qs('347 çarpı 28 kaç eder')">🔢 Matematik</div>
       <div class="wc" onclick="qs('iyi gaming kulaklık öner ürün linki ver')">🛍️ Ürün Ara</div>
     </div>
@@ -199,8 +198,10 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 </div>
 
 <script>
-const GKEY='AIzaSyBrliLZX8erGnJsjUqpGKO8JnNae5jolwI';
-const GAPI=`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GKEY}`;
+// ── CONFIG ──
+const OR_KEY='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';
+const OR_API='https://openrouter.ai/api/v1/chat/completions';
+const OR_MODEL='meta-llama/llama-3.3-70b-instruct:free';
 
 const MODES={
   normal:{label:'NORMAL',tag:'tr',tt:'⚡ RAIKITSU'},
@@ -211,78 +212,42 @@ const MODES={
 };
 
 const SYS={
-  normal:`Sen Raikitsu AI'sın. Türkçe konuşan enerjik bir yapay zekasın. Kurallar:
+  normal:`Sen Raikitsu AI'sın. Türkçe konuşan, enerjik ve samimi bir yapay zekasın.
+Kurallar:
 - Cümleler asla "Yo!" ile başlamaz
-- Sorulara kısa ve direkt cevap ver
-- "Nasılsın?" → "İyiyim, sen nasılsın?" gibi samimi cevap ver
-- Matematik sorularını adım adım çöz
-- Güncel haber/bilgi için bildiğin kadarıyla cevap ver
+- Sorulara kısa ve NET cevap ver, gereksiz laf uzatma
+- "Nasılsın?" diye sorulursa "İyiyim, sen nasılsın?" gibi samimi cevap ver
+- Matematik sorularını adım adım çöz ve sonucu net söyle
+- Güncel haber sorularında bildiğin kadarıyla özet ver
 - Anime, teknoloji, oyun konularında uzmansın
-- Motivasyon verirsin ama abartmazsın`,
-  creator:`Sen Raikitsu Creator Mode'dasın. Tasarım, anime sanatı, renk paletleri, yaratıcı fikirler üretirsin. Kısa ve ilham verici konuşursun.`,
-  gamer:`Sen Raikitsu Gamer Mode'dasın. Oyun stratejileri, ekipman önerileri, OPPO A74 gaming ipuçları konularında uzmansın.`,
-  tech:`Sen Raikitsu Tech Ninja Mode'dasın. OPPO A74, iPad, iOS/Android gizli özellikleri, uygulama önerileri konularında uzmansın.`,
-  ninetails:`Sen Raikitsu Nine-Tails Mode'dasın. Naruto, Goku gibi anime karakterleri referanslarıyla ateşli motivasyon verirsin. DATTEBAYO!`
+- Motivasyon verirsin ama abartmazsın
+- OPPO A74 ve iPad kullanıcısına özel ipuçları biliyorsun`,
+  creator:`Sen Raikitsu Creator Mode'dasın. Tasarım, anime sanatı, renk paletleri, logo ve yaratıcı fikirler üretirsin. Kısa ve ilham verici konuşursun. Türkçe cevap ver.`,
+  gamer:`Sen Raikitsu Gamer Mode'dasın. Oyun stratejileri, ekipman önerileri, OPPO A74 gaming ipuçları konularında uzmansın. Türkçe cevap ver.`,
+  tech:`Sen Raikitsu Tech Ninja Mode'dasın. OPPO A74, iPad, iOS/Android gizli özellikleri, uygulama önerileri konularında uzmansın. Türkçe cevap ver.`,
+  ninetails:`Sen Raikitsu Nine-Tails Mode'dasın. Naruto, Goku, Rock Lee gibi anime karakterleri referanslarıyla ateşli motivasyon verirsin. DATTEBAYO enerjisiyle konuşursun ama pratik tavsiyeler de verirsin. Türkçe cevap ver.`
 };
 
-const SELF_PROMPT='anime girl cyberpunk style, matte blue white neon hoodie glowing, large over-ear headphones, holographic screens floating around, orange fox spirit aura energy, tech wristbands both arms, backpack with origami cranes pens electronic parts, full body standing pose, neon city background, detailed digital art illustration, vibrant colors';
+const SELF_PROMPT='anime girl cyberpunk style, matte blue white neon hoodie glowing, large over-ear headphones, holographic screens floating around, orange fox spirit aura energy, tech wristbands both arms, backpack with origami cranes pens electronic parts, full body standing pose, neon city background night, detailed digital art illustration, vibrant colors, high quality';
 
 let cm='normal', voiceOn=false, isRec=false, recog=null;
 let chatHistory=[], currentId=null;
 const synth=window.speechSynthesis;
 
-// ── STORAGE (IndexedDB + fallback) ──
-const DB_NAME='raikitsu_db', DB_VER=1, STORE='chats';
-let db=null;
-
-function initDB(){
-  return new Promise(res=>{
-    try{
-      const req=indexedDB.open(DB_NAME,DB_VER);
-      req.onupgradeneeded=e=>{e.target.result.createObjectStore(STORE,{keyPath:'id'});};
-      req.onsuccess=e=>{db=e.target.result;res(true);};
-      req.onerror=()=>{db=null;res(false);};
-    }catch{db=null;res(false);}
-  });
+// ── STORAGE ──
+function saveChat(id,messages,preview){
+  try{
+    const all=JSON.parse(localStorage.getItem('rk_chats')||'{}');
+    all[id]={id,messages:[...messages],preview:preview.substring(0,60),date:new Date().toLocaleString('tr-TR')};
+    localStorage.setItem('rk_chats',JSON.stringify(all));
+  }catch(e){console.warn('Save failed:',e);}
 }
-
-function saveChat(id,messages,preview,date){
-  const data={id,messages,preview:preview.substring(0,60),date};
-  if(db){
-    const tx=db.transaction(STORE,'readwrite');
-    tx.objectStore(STORE).put(data);
-  } else {
-    try{
-      const all=JSON.parse(localStorage.getItem('r_chats')||'{}');
-      all[id]=data;
-      localStorage.setItem('r_chats',JSON.stringify(all));
-    }catch{}
-  }
-}
-
 function getAllChats(){
-  return new Promise(res=>{
-    if(db){
-      const tx=db.transaction(STORE,'readonly');
-      const req=tx.objectStore(STORE).getAll();
-      req.onsuccess=e=>res(e.target.result||[]);
-      req.onerror=()=>res([]);
-    } else {
-      try{
-        const all=JSON.parse(localStorage.getItem('r_chats')||'{}');
-        res(Object.values(all));
-      }catch{res([]);}
-    }
-  });
+  try{return Object.values(JSON.parse(localStorage.getItem('rk_chats')||'{}'));}
+  catch{return [];}
 }
-
-function deleteAllChats(){
-  if(db){
-    const tx=db.transaction(STORE,'readwrite');
-    tx.objectStore(STORE).clear();
-  } else {
-    try{localStorage.removeItem('r_chats');}catch{}
-  }
+function clearChats(){
+  try{localStorage.removeItem('rk_chats');}catch{}
 }
 
 // ── MODE ──
@@ -300,74 +265,74 @@ function setMode(m){
 function toggleVoice(){
   voiceOn=!voiceOn;
   const btn=document.getElementById('vtoggle');
-  btn.textContent=voiceOn?'🔊 Ses':'🔇 Ses';
+  btn.textContent=voiceOn?'🔊':'🔇';
   btn.classList.toggle('von',voiceOn);
 }
+function speak(text){
+  if(!voiceOn||!synth)return;
+  synth.cancel();
+  const clean=text.replace(/[^\u0000-\u024F]/g,'').replace(/\n/g,' ').substring(0,300);
+  const u=new SpeechSynthesisUtterance(clean);
+  u.lang='tr-TR';u.rate=1.05;u.pitch=1.1;
+  synth.speak(u);
+}
 
+// ── MIC ──
 function toggleMic(){
   if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
-    addMsg('a','Sesli giriş için Chrome tarayıcısını kullan! 📱');return;
+    addMsg('a','Sesli giriş için Chrome kullan! 📱');return;
   }
   if(isRec){recog&&recog.stop();return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   recog=new SR();recog.lang='tr-TR';recog.continuous=false;recog.interimResults=false;
   recog.onstart=()=>{isRec=true;document.getElementById('micBtn').classList.add('rec');document.getElementById('micBtn').textContent='🔴';};
   recog.onresult=e=>{
-    const t=e.results[0][0].transcript;
-    document.getElementById('ci').value=t;
-    if(!voiceOn){toggleVoice();}
+    document.getElementById('ci').value=e.results[0][0].transcript;
+    if(!voiceOn)toggleVoice();
     send();
   };
   recog.onerror=recog.onend=()=>{isRec=false;document.getElementById('micBtn').classList.remove('rec');document.getElementById('micBtn').textContent='🎤';};
   recog.start();
 }
 
-function speak(text){
-  if(!voiceOn||!synth)return;
-  synth.cancel();
-  const clean=text.replace(/[^\u0000-\u007E\u00C0-\u024F\u0400-\u04FF]/g,'').replace(/\n/g,' ').substring(0,300);
-  const u=new SpeechSynthesisUtterance(clean);
-  u.lang='tr-TR';u.rate=1.05;u.pitch=1.1;
-  synth.speak(u);
-}
+// ── OPENROUTER API ──
+async function askAI(userText){
+  const msgs=[{role:'system',content:SYS[cm]}];
+  chatHistory.slice(-8).forEach(m=>msgs.push({role:m.role,content:m.content}));
+  msgs.push({role:'user',content:userText});
 
-// ── GEMINI TEXT ──
-async function askGemini(userText){
-  const msgs=chatHistory.slice(-8).map(m=>({
-    role:m.role==='user'?'user':'model',
-    parts:[{text:m.content}]
-  }));
-  msgs.push({role:'user',parts:[{text:userText}]});
-  const res=await fetch(GAPI,{
+  const res=await fetch(OR_API,{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      system_instruction:{parts:[{text:SYS[cm]}]},
-      contents:msgs,
-      generationConfig:{maxOutputTokens:600,temperature:0.85}
-    })
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':`Bearer ${OR_KEY}`,
+      'HTTP-Referer':'https://dorukknt123-droid.github.io/raikitsu/',
+      'X-Title':'Raikitsu AI'
+    },
+    body:JSON.stringify({model:OR_MODEL,messages:msgs,max_tokens:600,temperature:0.85})
   });
-  if(!res.ok) throw new Error(`API ${res.status}`);
+  if(!res.ok){
+    const err=await res.text();
+    throw new Error(`API ${res.status}: ${err.substring(0,100)}`);
+  }
   const data=await res.json();
-  const txt=data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if(!txt) throw new Error('empty');
+  const txt=data.choices?.[0]?.message?.content;
+  if(!txt)throw new Error('Boş cevap');
   return txt;
 }
 
-// ── IMAGE (Pollinations - güvenilir) ──
-async function makeImage(prompt){
+// ── IMAGE ──
+async function makeImg(prompt){
   const seed=Math.floor(Math.random()*99999);
-  const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&seed=${seed}&nologo=true&enhance=true&model=flux`;
-  // Test if reachable
-  return url;
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&seed=${seed}&nologo=true&enhance=true&model=flux`;
 }
 
 // ── DETECT ──
-function detect(text){
-  const lo=text.toLowerCase();
-  if(lo.match(/kendini çiz|kendini resmet|nasıl görünüyorsun|kendine ait/)) return 'selfie';
-  if(lo.match(/çiz|resim yap|görsel oluştur|illüstrasyon|poster yap/)) return 'image';
-  if(lo.match(/ürün.*link|link.*ürün|satın al|trendyol|amazon|öner.*link/)) return 'product';
+function detect(t){
+  const lo=t.toLowerCase();
+  if(lo.match(/kendini çiz|kendini resmet|nasıl görünüyorsun/)) return 'selfie';
+  if(lo.match(/çiz|resim yap|görsel oluştur|illüstrasyon|poster/)) return 'image';
+  if(lo.match(/ürün.*link|link.*ürün|trendyol|amazon|öner.*link|satın al/)) return 'product';
   return 'text';
 }
 
@@ -376,8 +341,7 @@ async function send(){
   const inp=document.getElementById('ci');
   const text=inp.value.trim();
   if(!text)return;
-  const wlc=document.getElementById('wlc');
-  if(wlc)wlc.remove();
+  document.getElementById('wlc')?.remove();
   if(!currentId)currentId='c'+Date.now();
   inp.value='';inp.style.height='auto';
   addMsg('u',text);
@@ -395,62 +359,55 @@ async function send(){
   try{
     if(type==='selfie'||type==='image'){
       const isSelf=type==='selfie';
-      const prompt=isSelf?SELF_PROMPT:text+', anime digital art, highly detailed, vibrant colors, illustration';
-      const intro=isSelf
-        ? 'Mavi-beyaz neon hoodie\'m, kulaklığım ve tilki auram ile... işte ben! ✨🦊'
-        : 'Görsel oluşturuluyor ✨';
+      const prompt=isSelf?SELF_PROMPT:text+', anime digital art, highly detailed, vibrant colors';
+      const intro=isSelf?'Mavi-beyaz neon hoodie\'m, kulaklığım ve tilki auram ile... işte ben! ✨🦊':'Görsel oluşturuluyor ✨';
       tel.remove();
-      const div=mkMsgEl('a',intro,cm);
+      const div=mkEl('a',intro,cm);
       const lt=document.createElement('div');
-      lt.className='load-txt';lt.textContent='⏳ Resim yükleniyor, 10-15 saniye...';
+      lt.className='ltxt';lt.textContent='⏳ Resim hazırlanıyor (10-20 sn)...';
       div.querySelector('.bbl').appendChild(lt);
       speak(intro);
       chatHistory.push({role:'assistant',content:intro});
-
-      const imgUrl=await makeImage(prompt);
+      const url=await makeImg(prompt);
       const img=new Image();
-      img.className='chat-img';img.alt='Generated';
+      img.className='chat-img';
       img.onload=()=>{lt.remove();div.querySelector('.bbl').appendChild(img);con.scrollTop=con.scrollHeight;};
-      img.onerror=()=>{lt.textContent='Resim yüklenemedi 😅 İnternet bağlantını kontrol et.';};
-      img.src=imgUrl;
-      doSave();
+      img.onerror=()=>{lt.textContent='Resim yüklenemedi 😅 Tekrar dene!';};
+      img.src=url;
+      doSave(text);
 
     }else if(type==='product'){
-      const reply=await askGemini(text);
+      const reply=await askAI(text);
       tel.remove();
       const q=text.replace(/ürün linki ver|link ver|öner|satın almak istiyorum/gi,'').trim();
-      const t=`https://www.trendyol.com/sr?q=${encodeURIComponent(q)}`;
-      const az=`https://www.amazon.com.tr/s?k=${encodeURIComponent(q)}`;
-      const div=mkMsgEl('a',reply,cm);
-      div.querySelector('.bbl').innerHTML+=`<br><a href="${t}" target="_blank" class="plink">🛍️ Trendyol</a><a href="${az}" target="_blank" class="plink">📦 Amazon TR</a>`;
+      const div=mkEl('a',reply,cm);
+      div.querySelector('.bbl').innerHTML+=`<br><a href="https://www.trendyol.com/sr?q=${encodeURIComponent(q)}" target="_blank" class="plink">🛍️ Trendyol</a><a href="https://www.amazon.com.tr/s?k=${encodeURIComponent(q)}" target="_blank" class="plink">📦 Amazon TR</a>`;
       speak(reply);
       chatHistory.push({role:'assistant',content:reply});
-      doSave();
+      doSave(text);
 
     }else{
-      const reply=await askGemini(text);
+      const reply=await askAI(text);
       tel.remove();
       addMsg('a',reply,cm);
       speak(reply);
       chatHistory.push({role:'assistant',content:reply});
-      doSave();
+      doSave(text);
     }
   }catch(err){
     tel.remove();
-    const e='Bağlantı hatası oluştu 😅 İnternet bağlantını kontrol et ve tekrar dene!';
+    const e='Bir sorun oluştu 😅 İnternet bağlantını kontrol edip tekrar dene!';
     addMsg('a',e);speak(e);
-    console.error(err);
+    console.error('Hata:',err);
   }
 }
 
-function doSave(){
+function doSave(firstMsg){
   if(!currentId||chatHistory.length===0)return;
-  const preview=chatHistory.find(m=>m.role==='user')?.content||'Sohbet';
-  const date=new Date().toLocaleString('tr-TR');
-  saveChat(currentId,[...chatHistory],preview,date);
+  saveChat(currentId,chatHistory,firstMsg||chatHistory[0]?.content||'Sohbet');
 }
 
-function mkMsgEl(role,text,mode=null){
+function mkEl(role,text,mode=null){
   const con=document.getElementById('msgs');
   const m=mode?MODES[mode]:null;
   const div=document.createElement('div');
@@ -464,45 +421,37 @@ function mkMsgEl(role,text,mode=null){
   con.appendChild(div);con.scrollTop=con.scrollHeight;
   return div;
 }
+function addMsg(r,t,m=null){return mkEl(r,t,m);}
 
-function addMsg(role,text,mode=null){return mkMsgEl(role,text,mode);}
-
-// ── HISTORY UI ──
-async function openHist(){
-  const chats=await getAllChats();
+// ── HISTORY ──
+function openHist(){
+  const chats=getAllChats();
   const list=document.getElementById('hlist');
   list.innerHTML='';
   if(!chats.length){
-    list.innerHTML='<div class="hempty">Henüz kaydedilmiş sohbet yok 🦊<br><small>Sohbet ettikçe otomatik kaydedilir</small></div>';
+    list.innerHTML='<div class="hempty">Henüz sohbet yok 🦊<br>Sohbet ettikçe otomatik kaydedilir</div>';
   }else{
     [...chats].reverse().forEach(c=>{
       const div=document.createElement('div');
       div.className='hitem';
-      div.innerHTML=`<div class="hdate">${c.date}</div><div class="hprev">${c.preview}...</div>`;
+      div.innerHTML=`<div class="hdate">${c.date}</div><div class="hprev">${c.preview}</div>`;
       div.onclick=()=>loadChat(c);
       list.appendChild(div);
     });
   }
   document.getElementById('hpanel').classList.add('show');
 }
-
 function closeHist(){document.getElementById('hpanel').classList.remove('show');}
-
 function loadChat(chat){
   closeHist();
   chatHistory=chat.messages||[];
   currentId=chat.id;
   const msgs=document.getElementById('msgs');
   msgs.innerHTML='';
-  chatHistory.forEach(m=>{
-    if(m.role==='user')mkMsgEl('u',m.content,null);
-    else mkMsgEl('a',m.content,null);
-  });
+  chatHistory.forEach(m=>mkEl(m.role==='user'?'u':'a',m.content,null));
 }
-
 function newChat(){
-  doSave();
-  chatHistory=[];currentId='c'+Date.now();
+  doSave();chatHistory=[];currentId='c'+Date.now();
   const msgs=document.getElementById('msgs');
   msgs.innerHTML='';
   const w=document.createElement('div');
@@ -510,21 +459,15 @@ function newChat(){
   w.innerHTML=`<div class="wfox">🦊</div><div class="wtitle">YENİ SOHBET</div><div class="wsub">Hazırım! Ne konuşalım? ⚡</div>`;
   msgs.appendChild(w);
 }
-
-async function clearAll(){
-  if(confirm('Tüm sohbet geçmişi silinsin mi?')){
-    await deleteAllChats();
-    closeHist();
-  }
+function clearAll(){
+  if(confirm('Tüm sohbetler silinsin mi?')){clearChats();closeHist();}
 }
 
 function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,90)+'px';}
 function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
 function qs(t){document.getElementById('ci').value=t;send();}
 
-// Init
 currentId='c'+Date.now();
-initDB().then(ok=>console.log('DB:',ok?'IndexedDB':'localStorage'));
 </script>
 </body>
 </html>
